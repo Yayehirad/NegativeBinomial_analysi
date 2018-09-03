@@ -1,0 +1,300 @@
+#R-codes for The role of super-spreaders in Mycobacterium tuberculosis transmission: Evidence from contact tracing
+#Yayehirad A Melsew1,2, Manoj Gambhir1,3, Allen C Cheng1, Emma McBryde4,5, Justin Denholm6, 7, EeLaine Tay6, James Trauer1,6
+
+
+
+#CONTACT DISTRIBUTION
+#ALL CONTACT TYPES DISTRIBUTION
+alz1=read.csv(file.choose()) #open CSV data with number of contact per index patient
+
+summary(alz1$cont_per_index)
+sum(alz1$cont_per_index)
+
+par(mfrow=c(1,2))#draw two hitsograms together in pannels 
+hist(alz1$cont_per_index,main="A.Contact distribution, k=0.38",
+     xlab="number of contacts per index", 
+     breaks=seq(0,280,1), xlim=c(0,277), col='blue', ylim=c(0,300))
+library(MASS)
+fitdistr(alz1$cont_per_index,'negative binomial')->NB.fit
+NB.fit$estimate
+dnbinom(0:277,size=NB.fit$estimate[1],mu=NB.fit$estimate[2])*length(alz1$cont_per_index)
+lines(0.5 :277.5,dnbinom(0:277,size=NB.fit$estimate[1],mu=NB.fit$estimate[2])*length(alz1$cont_per_index), col="red",lwd=2)
+box()
+
+hist(alz1$cont_per_index,main="B. Subset of contacts", xlab="number of contacts per index", 
+     breaks=seq(0,280,1), xlim=c(0,40), col='blueviolet', ylim=c(0,300))
+library(MASS)
+fitdistr(alz1$cont_per_index,'negative binomial')->NB.fit
+NB.fit$estimate
+dnbinom(0:40,size=NB.fit$estimate[1],mu=NB.fit$estimate[2])*length(alz1$cont_per_index)
+lines(0.5 :40.5,dnbinom(0:40,size=NB.fit$estimate[1],mu=NB.fit$estimate[2])*length(alz1$cont_per_index), col="red",lwd=2)
+box()
+
+#CLOSE CONTACTS DISTRIBUTION
+
+calz1=read.csv(file.choose())#Open close contacts per index csv
+View(calz1)
+summary(calz1$cont_per_index)
+sum(calz1$cont_per_index)
+par(mfrow=c(1,2))#histograms
+hist(calz1$cont_per_index,main="A. Close contact distribution, k=0.63", xlab="number of contacts per index", 
+     breaks=seq(0,160,1), xlim=c(0,157), col='coral2', ylim=c(0,400))
+library(MASS)
+fitdistr(calz1$cont_per_index,'negative binomial')->NB.fit
+NB.fit$estimate
+dnbinom(0:157,size=NB.fit$estimate[1],mu=NB.fit$estimate[2])*length(calz1$cont_per_index)
+lines(0.5 :157.5,dnbinom(0:157,size=NB.fit$estimate[1],mu=NB.fit$estimate[2])*length(calz1$cont_per_index), col="blue",lwd=2)
+box()
+
+hist(calz1$cont_per_index,main="B.Subset of close contacts", xlab="number of contacts per index", 
+     breaks=seq(0,160,1), xlim=c(0,40), col='coral2', ylim=c(0,300))
+library(MASS)
+fitdistr(calz1$cont_per_index,'negative binomial')->NB.fit
+NB.fit$estimate
+dnbinom(0:157,size=NB.fit$estimate[1],mu=NB.fit$estimate[2])*length(calz1$cont_per_index)
+lines(0.5 :40.5,dnbinom(0:40,size=NB.fit$estimate[1],mu=NB.fit$estimate[2])*length(calz1$cont_per_index), col="blue",lwd=2)
+box()
+
+##SUPER CONTACTING EVENTS
+library(MASS)
+fitdistr(alz1$cont_per_index, "Poisson") # find the mean(lambda) o
+pois1 <- rpois(2312, lambda = 7.797) # generate a Poison distribution of contact per index, for 2312 index patients
+View(pois1)
+pois3=as.array(pois1)
+View(pois3)
+quantile(pois1, c(.25, .5, .75, .9, .95, .99)) # the 99th percentile will be the cut-off for super contacter
+#===================================================================================================================
+# SECONDARY INFECTIONS
+
+ilz2=read.csv(file.choose())#Open infection per index csv
+View(ilz2)
+summary(ilz2$inf_per_index)
+quantile(ilz2$inf_per_index)
+quantile(ilz2$inf_per_index, c(.25, .5, .75, .9, .95, .99)) 
+ilst=table(ilz2$inf_per_index)
+class(ilz2)
+View(ilst)
+hist(ilz2$inf_per_index,main="A.Infection distribution, k=0.16", xlab="number of infections per index",breaks=seq(0,45,1), xlim=c(0,41), col='coral2', ylim=c(0,300))
+library(MASS)
+fitdistr(ilz2$inf_per_index,'negative binomial')->NB.fit
+NB.fit$estimate
+confint(NB.fit)
+dnbinom(0:41,size=NB.fit$estimate[1],mu=NB.fit$estimate[2])*length(ilz2$inf_per_index)
+lines(0.5 :41.5,dnbinom(0:41,size=NB.fit$estimate[1],mu=NB.fit$estimate[2])*length(ilz2$inf_per_index), col="blue",lwd=2)
+box()
+
+#SUPER-SPREADING EVENTS 
+
+library(MASS)
+fitdistr(ilz2$inf_per_index, "Poisson") # find the mean or effective reproductive number
+pois1 <- rpois(4190, lambda = 0.7668) # generate a Poison distribution of infection per index
+View(pois1)
+pois3=as.array(pois1)
+View(pois3)
+quantile(pois1, c(.25, .5, .75, .9, .95, .99)) #the 99th centile will be the cut-point for super-spreading events
+
+#======================================================================================================================
+#SECONDARY ACTIVE TB
+
+acttb=read.csv(file.choose())#open secondary active TB per index csv
+View(acttb)
+t=table(acttb$activetb_perindex)
+View(t)
+hist(acttb$activetb_perindex,main="B.Active TB distribution, k=0.036", xlab="number of active TB per index"
+     ,breaks=seq(0,12,1), xlim=c(0,12), col='coral2', ylim=c(0,300))
+
+library(MASS)
+fitdistr(acttb$activetb_perindex,'negative binomial')->NB.fit
+NB.fit$estimate
+dnbinom(0:12,size=NB.fit$estimate[1],mu=NB.fit$estimate[2])*length(acttb$activetb_perindex)
+lines(0.5 :12.5,dnbinom(0:12,size=NB.fit$estimate[1],mu=NB.fit$estimate[2])*length(acttb$activetb_perindex), col="blue",lwd=3)
+box()
+
+#Super-spreading events in secondary disease
+library(MASS)
+fitdistr(acttb$activetb_perindex, "Poisson") # find the mean or effective reproductive number
+pois1 <- rpois(4190, lambda = 0.054) # generate a Poison distribution of secondary active TB per index, 
+View(pois1)
+pois3=as.array(pois1)
+View(pois3)
+quantile(pois1, c(.25, .5, .75, .9, .95, .99)) #the 99th centile will be the cut-off for super-spreading event
+#=============================================================================================================================
+#plotting proportion of contacts,infection, disease attributatble to ranked proportion of index cases rank
+graph=read.csv(file.choose())# secondary infection ranked csv
+graphA=read.csv(file.choose())# secondary disease ranked csv
+#homo=read.csv(file.choose())#homogeneous population from Poisson distribution for infection ranked csv
+#alcont=read.csv(file.choose())#all contaxts ranked csv
+#clcont=read.csv(file.choose())#close contacts ranked csv
+plot(c(alcont$rank.proportion,alcont$Cumulative_cont_proportion),c(clcont$rank.proportion,clcont$Cumulative.infection.proportion),type="n",
+     xlab='Proportion of index cases (ranked)',
+     ylab = 'Cumulative proportion',main="A", panel.first= grid())
+
+#lines(alcont$rank.proportion,alcont$Cumulative_cont_proportion,lwd=2.5,col='green')
+#lines(clcont$rank.proportion,clcont$Cumulative.infection.proportion,lwd=2.5,col='darkorange4')
+#lines(homo$rank_proportion,homo$Cum.inf_propo,lwd=2.7,col="black")
+lines(graph$rank.proportion,graph$Cumulative.infection.proportion,lwd=2.5,col = 'blue')
+lines(graphA$rank.proportion,graphA$Cumulative.activeTB.proportion,lwd=2.5,col = 'red')
+legend(0.4,0.4,c("all contacts","close contacts","infection","active TB","homogeous population"),lty=c(1,1),lwd=c(2.5,2.5),
+       col=c("green","darkorange4","blue","red","black"))
+
+#============================================================================================
+#plot contact and infection pattern with index age
+nbp=read.csv(file.choose()) #open CSV that has all index(pulmonary) variables and number of infection, contact,active TB per index  , 
+plot(nbp$index_age,nbp$inf_per_index,type="n",xlab="index age(years)",ylab="number",ylim = c(0,150))
+lines(nbp$inf_per_index,lwd=2.5,col='darkorange4')
+lines(nbp$cont_per_index,lwd=2.5,col='green')
+legend(65,100,c("contacts","infections"),lty=c(1,1),lwd=c(2.5,2.5),
+       col=c("green","darkorange4"))
+
+#======================================================================================================================
+#NEGATIVE BINOMIAL REGRESSION
+
+nbp=read.csv(file.choose())#open pulmonary index cases
+ View(nbp)
+
+ #step 1=set referent category
+
+ nbp$index_sex <- relevel(nbp$index_sex, ref="Female")
+ nbp$age_category <- relevel(nbp$age_category, ref="B")
+ nbp$index_site <- relevel(nbp$index_site, ref="Pulmonary")
+ nbp$index_casefoundby<-relevel(nbp$index_casefoundby,ref = "Clinical Presentation")
+ nbp$index_cxrresult <- relevel(nbp$index_cxrresult, ref="Normal")
+ nbp$index_diagnosis <- relevel(nbp$index_diagnosis, ref="Culture")
+ #nbp$index_dst <- relevel(nbp$index_dst, ref="Fully sensitive")
+ nbp$index_newrelapse <- relevel(nbp$index_newrelapse, ref="New case")
+
+ #step 2= cros tab
+ 
+ table(nbp$age_category)
+ table(nbp$index_sex)
+ table(nbp$index_site)
+ table(nbp$index_casefoundby)
+ table(nbp$index_cxrresult)
+ table(nbp$index_diagnosis)
+ table(nbp$index_newrelapse)
+ 
+ #Step 3 Bivariate analysis
+
+#fit negative binomial reg model
+ library(MASS)
+ nbp0=glm.nb(inf_per_index~age_category,data = nbp)
+ nbp1=glm.nb(inf_per_index~index_sex,data = nbp)
+ nbp2=glm.nb(inf_per_index~index_site,data = nbp)
+ nbp3=glm.nb(inf_per_index~index_cxrresult,data = nbp)
+ nbp4=glm.nb(inf_per_index~index_diagnosis,data = nbp)
+  nbp6=glm.nb(inf_per_index~index_newrelapse,data = nbp)
+ nbp7=glm.nb(inf_per_index~index_casefoundby,data = nbp)
+ nbp8=glm.nb(inf_per_index~as.numeric(cont_per_index),data = nbp)
+ # find the confidence interval of the coefficients and then exponentiate to compute the RR with 95%CI
+ (esta <- cbind(Estimate = coef(nbp0), confint(nbp0)))
+ exp(esta)
+ (estb <- cbind(Estimate = coef(nbp1), confint(nbp1)))
+ exp(estb)
+ (estc <- cbind(Estimate = coef(nbp2), confint(nbp2)))
+ exp(estc)
+ (estd <- cbind(Estimate = coef(nbp3), confint(nbp3)))
+ exp(estd)
+ (este <- cbind(Estimate = coef(nbp4), confint(nbp4)))
+ exp(este)
+ (estg <- cbind(Estimate = coef(nbp6), confint(nbp6)))
+ exp(estg)
+ (esth <- cbind(Estimate = coef(nbp7), confint(nbp7)))
+ exp(esth)
+ (esti <- cbind(Estimate = coef(nbp8), confint(nbp8)))
+ exp(esti)
+
+#Step 4 Multivariate analysis
+
+#fitt the model
+ nbpt=glm.nb(inf_per_index~nbp$age_category+nbp$index_sex+nbp$index_site+nbp$index_casefoundby+nbp$index_cxrresult+nbp$index_diagnosis+nbp$index_newrelapse+nbp$cont_per_index, data = nbp)
+ summary(nbpt)
+# find the confidence interval of the coefficients and then exponentiate to compute the RR with 95%CI
+ estt<-cbind(Estimate = coef(nbpt), confint(nbpt))
+ exp(estt)
+
+#============================================================================================
+
+
+#NEGATIVE BINOMIAL REGRESSION for index with contacts only
+
+nbp=read.csv(file.choose())#open pulmonary index cases
+View(nbp)
+
+#step 1=set referent category
+
+nbp$index_sex <- relevel(nbp$index_sex, ref="Female")
+nbp$age_category <- relevel(nbp$age_category, ref="C")
+nbp$index_site <- relevel(nbp$index_site, ref="Pulmonary")
+nbp$index_casefoundby<-relevel(nbp$index_casefoundby,ref = "Clinical Presentation")
+nbp$index_cxrresult <- relevel(nbp$index_cxrresult, ref="Normal")
+nbp$index_diagnosis <- relevel(nbp$index_diagnosis, ref="Culture")
+#nbp$index_dst <- relevel(nbp$index_dst, ref="Fully sensitive")
+nbp$index_newrelapse <- relevel(nbp$index_newrelapse, ref="New case")
+#step 2= cros tab
+
+table(nbp$age_category)
+table(nbp$index_sex)
+table(nbp$index_site)
+table(nbp$index_casefoundby)
+table(nbp$index_cxrresult)
+table(nbp$index_diagnosis)
+table(nbp$index_newrelapse)
+#Step 3 Bivariate analysis
+
+#fit negative binomial reg model
+library(MASS)
+nbp0=glm.nb(inf_per_index~age_category,data = nbp,offset(log(nbp$cont_per_index)))
+nbp1=glm.nb(inf_per_index~index_sex,data = nbp,offset(log(nbp$cont_per_index)))
+nbp2=glm.nb(inf_per_index~index_site,data = nbp,offset(log(nbp$cont_per_index)))
+nbp3=glm.nb(inf_per_index~index_cxrresult,data = nbp,offset(log(nbp$cont_per_index)))
+nbp4=glm.nb(inf_per_index~index_diagnosis,data = nbp,offset(log(nbp$cont_per_index)))
+nbp6=glm.nb(inf_per_index~index_newrelapse,data = nbp,offset(log(nbp$cont_per_index)))
+nbp7=glm.nb(inf_per_index~index_casefoundby,data = nbp,offset(log(nbp$cont_per_index)))
+#nbp8=glm.nb(inf_per_index~as.numeric(cont_per_index),data = nbp)
+# find the confidence interval of the coefficients and then exponentiate to compute the RR with 95%CI
+(esta <- cbind(Estimate = coef(nbp0), confint(nbp0)))
+exp(esta)
+(estb <- cbind(Estimate = coef(nbp1), confint(nbp1)))
+exp(estb)
+(estc <- cbind(Estimate = coef(nbp2), confint(nbp2)))
+exp(estc)
+(estd <- cbind(Estimate = coef(nbp3), confint(nbp3)))
+exp(estd)
+(este <- cbind(Estimate = coef(nbp4), confint(nbp4)))
+exp(este)
+(estg <- cbind(Estimate = coef(nbp6), confint(nbp6)))
+exp(estg)
+(esth <- cbind(Estimate = coef(nbp7), confint(nbp7)))
+exp(esth)
+#(esti <- cbind(Estimate = coef(nbp8), confint(nbp8)))
+#exp(esti)
+#Step 4 Multivariate analysis
+
+#fitt the model
+nbpt=glm.nb(inf_per_index~nbp$age_category+nbp$index_sex+nbp$index_site+nbp$index_casefoundby+nbp$index_cxrresult
+            +nbp$index_diagnosis+nbp$index_newrelapse, data = nbp,offset(log(nbp$cont_per_index)))
+summary(nbpt)
+# find the confidence interval of the coefficients and then exponentiate to compute the RR with 95%CI
+estt<-cbind(Estimate = coef(nbpt), confint(nbpt))
+exp(estt)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
